@@ -2,8 +2,8 @@ import {matchesSavedMap, sortMaps} from '../utils';
 import PrefixStorage from './PrefixStorage';
 
 class HostStorage extends PrefixStorage {
-  constructor() {
-    super();
+  constructor(storageArea) {
+    super(storageArea);
     this.PREFIX = 'map=';
     this.SET_KEY = 'host';
   }
@@ -25,4 +25,4 @@ class HostStorage extends PrefixStorage {
 
 }
 
-export default new HostStorage();
+export default new HostStorage('local');

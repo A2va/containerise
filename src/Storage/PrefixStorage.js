@@ -1,11 +1,35 @@
 export default class PrefixStorage {
 
-  constructor() {
+  constructor(storageArea = 'local') {
     this.PREFIX = '';
     // The key to use to get the name of the object when calling set()
     this.SET_KEY = 'key';
-    this.storage = browser.storage.local;
+    this.storage = browser.storage[storageArea];
+    this.storageArea = storageArea;
     this.listeners = new Map();
+  }
+
+  switchStorage(newStorageArea) {
+    if (newStorageArea != this.storageArea) {
+      const oldStorage = this.storage;
+
+      // Get all data from old storage and copy to new storage
+      oldStorage.get(null).then(results => {
+        // Filter only items with our prefix
+        const prefixedData = Object.entries(results)
+          .filter(([key]) => key.startsWith(this.PREFIX))
+          .reduce((obj, [key, value]) => {
+            obj[key] = value;
+            return obj;
+          }, {});
+
+        // Set data in new storage area
+        browser.storage[newStorageArea].set(prefixedData);
+
+        this.storageArea = newStorageArea;
+        this.storage = browser.storage[newStorageArea];
+      });
+    }
   }
 
   /**
@@ -19,19 +43,18 @@ export default class PrefixStorage {
     return this.storage.get(null).then((results) => {
       return this._getNonPrefixedObject(results);
     });
-
   }
 
-  _getNonPrefixedObject(prefixedObject){
+  _getNonPrefixedObject(prefixedObject) {
     return Object
-          .keys(prefixedObject)
-          .filter((key) => key.startsWith(this.PREFIX))
-          .reduce((newObject, key) => {
-            newObject[
-                key.replace(this.PREFIX, '')
-                ] = prefixedObject[key];
-            return newObject;
-          }, {});
+      .keys(prefixedObject)
+      .filter((key) => key.startsWith(this.PREFIX))
+      .reduce((newObject, key) => {
+        newObject[
+          key.replace(this.PREFIX, '')
+        ] = prefixedObject[key];
+        return newObject;
+      }, {});
   }
 
   async get(key) {
@@ -51,7 +74,7 @@ export default class PrefixStorage {
     if (key === undefined) {
       throw `Key ${this.SET_KEY} not found in object`;
     }
-    return this.storage.set({[`${this.PREFIX}${key}`]: obj});
+    return this.storage.set({ [`${this.PREFIX}${key}`]: obj });
   }
 
   /**
@@ -60,7 +83,7 @@ export default class PrefixStorage {
    */
   remove(keys) {
     keys = Array.isArray(keys) ? keys : [keys];
-    return this.storage.remove(keys.map( key => `${this.PREFIX}${key}`));
+    return this.storage.remove(keys.map(key => `${this.PREFIX}${key}`));
   }
 
   /**
@@ -76,17 +99,17 @@ export default class PrefixStorage {
    * @param fn {Function<Object, String>}
    */
   addOnChangedListener(fn) {
-    if(fn in this.listeners){
+    if (fn in this.listeners) {
       return;
     }
     const listener = (changes, area) => {
       let prefixChanges = this._getNonPrefixedObject(changes);
-      if(!prefixChanges){
+      if (!prefixChanges) {
         return;
       }
       fn(prefixChanges, area);
     };
-    this.listeners[fn]=listener;
+    this.listeners[fn] = listener;
     browser.storage.onChanged.addListener(listener);
   }
 

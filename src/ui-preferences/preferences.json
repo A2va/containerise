@@ -12,6 +12,12 @@
     "description": "After a contained tab has been created, the old won't be closed"
   },
   {
+    "type": "bool",
+    "name": "sync",
+    "label": "Synchronize configurations",
+    "description": "Synchronize configurations between all devices"
+  },
+  {
     "type": "group",
     "name": "defaultContainer",
     "label": "Default container",

@@ -1,8 +1,8 @@
 import PrefixStorage from './PrefixStorage';
 
 class PreferenceStorage extends PrefixStorage {
-  constructor() {
-    super();
+  constructor(storageArea) {
+    super(storageArea);
     this.PREFIX = 'pref=';
   }
 
@@ -25,4 +25,4 @@ class PreferenceStorage extends PrefixStorage {
   }
 }
 
-export default new PreferenceStorage();
+export default new PreferenceStorage('local');

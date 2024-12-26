@@ -1,4 +1,5 @@
 import PreferenceStorage from '../Storage/PreferenceStorage';
+import HostStorage from '../Storage/HostStorage';
 import template from '!!raw-loader!./templates/Preference.html';
 import {createEl, qs} from './utils';
 
@@ -172,6 +173,12 @@ export default class Preference {
    */
   update() {
     const newValue = this.get();
+    if (this.name == 'sync') {
+      const storageArea = newValue ? 'sync' : 'local';
+      PreferenceStorage.switchStorage(storageArea);
+      HostStorage.switchStorage(storageArea);
+    }
+
     return PreferenceStorage.set({
       key: this.name,
       value: newValue,
